@@ -11,4 +11,5 @@ Projekt je vytvorený v rámci MS Visual Studio 2015.
 Alternatívne je možné vytvoriť kompilovanú verziu pomocou priložených skriptov 
 * 'compile.cmd'
 * 'compileCC.cmd'
+
 Skripty pre svoj beh vyzaduju instalaciu .net frameworku 4 a su pripravene pre x64 operacny system. Pre ine prostredie mozu byt potrebne upravy.

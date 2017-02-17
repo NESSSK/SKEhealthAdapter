@@ -10,6 +10,7 @@ using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
 using System.ServiceModel.Security.Tokens;
+using System.Text.RegularExpressions;
 using System.Threading;
 #if CC
 using Iam.Client;
@@ -20,9 +21,8 @@ namespace SSLKlient
 {
     public class CallHelper
     {
-        public static eHtalkMessage GetResponseSync(eHtalkMessage msg, X509Certificate2 extInterfaCertificate, string esbEndpoint, string relyingParty, string identityProviderURL, X509Certificate2 userCertificate, string dnsIdentity, string wsaddressingTo, Stopwatch stopw)
+        public static eHtalkMessage GetResponseSync(eHtalkMessage msg, X509Certificate2 extInterfaCertificate, string esbEndpoint, string relyingParty, string identityProviderURL, X509Certificate2 userCertificate, string wsaddressingTo, Stopwatch stopw)
         {
-            Debug.WriteLine("Start", "MyCustom");
 
 #if !CC
             IssuedSecurityTokenProvider provider = new IssuedSecurityTokenProvider();
@@ -75,6 +75,8 @@ namespace SSLKlient
             binding.Elements.Add(sbe);
             binding.Elements.Add(new TextMessageEncodingBindingElement(MessageVersion.Soap12WSAddressing10, System.Text.Encoding.UTF8));
             binding.Elements.Add(new HttpsTransportBindingElement() {RequireClientCertificate = true, KeepAliveEnabled = true} );
+            var regEx = new Regex(@"https?://([^/]+)");
+            var dnsIdentity = regEx.Match(wsaddressingTo).Groups[1].Captures[0].Value;
             var channelFactory = new ChannelFactory<IeHealthSyncService>(binding,
                                                                 new EndpointAddress(
                                                                         new Uri(wsaddressingTo),

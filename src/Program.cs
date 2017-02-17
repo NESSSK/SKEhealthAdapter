@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -22,7 +23,7 @@ namespace SSLKlient
             Trace.TraceInformation("Custom, started");
             ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(OnValidationCallback);
             ServicePointManager.Expect100Continue = true;
-            ServicePointManager.FindServicePoint(new Uri("https://sslpzs.preprod.npz.sk/ESB.SyncServiceExt/Service.svc")).MaxIdleTime = 3600000;
+            ServicePointManager.FindServicePoint(new Uri(ConfigurationManager.AppSettings["SyncExtSSL"])).MaxIdleTime = 3600000;
 
             //ServicePointManager.SetTcpKeepAlive(true, 60*1000, 30);
            ServicePointManager.SecurityProtocol =SecurityProtocolType.Tls;//(SecurityProtocolType)3072; //SecurityProtocolType.Tls12;
@@ -54,12 +55,12 @@ namespace SSLKlient
                                         {
                                             rootOID =
                                                 "1.3.158.00165387.100.40.70",
-                                            extension = "00020341160"
+                                            extension = "00000000000"
                                         },
                                     Specialization =
                                         new UserContextSpecialization
                                         {
-                                            codeValue = "00000115899",
+                                            codeValue = "00000000000",
                                             codingSchemeOID =
                                                 "1.3.158.00165387.100.10.34",
                                             codingSchemeVersion = "1"
@@ -95,13 +96,12 @@ namespace SSLKlient
 
             var result = CallHelper.GetResponseSync(message,
                 new X509Certificate2(Assembly.GetExecutingAssembly().GetManifestResourceStream("SSLKlient.services_preprod_npz_sk.cer").ReadAllBytes()),
-                //"https://services.preprod.npz.sk/ESB.SyncServiceExt/Service.svc",
-                "https://sslpzs.preprod.npz.sk/ESB.SyncServiceExt/Service.svc",
-                "http://services.preprod.npz.sk",
-                "https://sts-zpr.preprod.npz.sk/adfs/services/Trust/2005/CertificateTransport/",
-                scollection[0]
-                , "services.preprod.npz.sk", "http://services.preprod.npz.sk/ESB.SyncServiceExt/Service.svc", stopw);
-
+                ConfigurationManager.AppSettings["SyncExtSSL"],
+                ConfigurationManager.AppSettings["TargetServiceIdentifier"],
+                String.Format("{0}{1}", ConfigurationManager.AppSettings["IamStsServiceBaseUri"], "Trust/2005/CertificateTransport/"),
+                scollection[0],
+                ConfigurationManager.AppSettings["SyncExt"], stopw);
+            
             var ser = new XmlSerializer(typeof(eHtalkMessage));
             var sw =new StringWriter();
             ser.Serialize(sw, result);
