@@ -1,0 +1,1 @@
+Sem je potrebné umiestnit kniznice CryptoController
